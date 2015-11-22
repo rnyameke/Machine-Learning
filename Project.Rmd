@@ -45,6 +45,39 @@ clean_data <- data_wo_time
 
 ````
 
-````{r model}
-model <- train(classe ~ ., method = "gbm", data = clean_data, verbose = TRUE)
+````{r model, cache = TRUE}
+#building model using gbm and cross-fold validation (for speed reasons)
+model <- train(classe ~ ., method = "gbm", trControl = trainControl(method = "cv", number = 10),
+               data = clean_data, verbose = TRUE)
+````
+
+````{r clean test data, cache = TRUE}
+
+#predict with model
+test_data <- read.csv("pml-testing.csv")
+
+#keeping only the variables from the train data model
+keepvariables <- names(clean_data)
+
+#removing the classe variable
+keepvariables <- keepvariables[-1]
+
+#subsetting the test data
+clean_test_data <- subset(test_data, select = keepvariables)
+
+````
+
+````{r predict}
+answers <- predict(model, data = clean_test_data)
+
+pml_write_files <- function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+pml_write_files(answers)
+
 ````
