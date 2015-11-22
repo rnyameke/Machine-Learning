@@ -6,6 +6,7 @@ output:
   html_document: 
     keep_md: yes
 ---
+##Data Processing
 ````{r load, message = FALSE}
 data <- read.csv("pml-training.csv")
 library(dplyr)
@@ -33,4 +34,16 @@ highcorr <- findCorrelation(correlationMatrix, cutoff = 0.75)
 #removing the highly correlated columns
 data_wo_corr <- data_wo_nas[,-highcorr]
 
+#removing the timestamp columns
+data_wo_time <- data_wo_corr[, -(2:3)]
+
+#renaming the classe column
+names(data_wo_time)[1] <- "classe"
+
+clean_data <- data_wo_time
+
+````
+
+````{r model}
+model <- train(classe ~ ., method = "gbm", data = clean_data, verbose = TRUE)
 ````
