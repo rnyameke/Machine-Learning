@@ -6,14 +6,32 @@ output:
   html_document: 
     keep_md: yes
 ---
+I built my model with considerations for speed and accuracy. My first thought was
+to try different models (specifically, random forests and multiple boosting methods),
+and to pick the best model based on accuracy. However, due to computation limitations,
+I built one model with Generalized Boosted Regression Modeling with 10-fold cross-
+validation, and because I was satisfied with the accuracy, I did not build any other
+models. When I used my model to predict the values of "classe" on the test data
+set, I was able to obtain the correct values for all the cases, confirming the
+accuracy of the model.
+
 ##Data Processing
 ````{r load, message = FALSE}
 data <- read.csv("pml-training.csv")
+library(plyr)
 library(dplyr)
 library(caret)
 library(ggplot2)
 library(gbm)
 ````
+
+I took a simple approach to cleaning the data, and did not use any of the pre-
+processing functions in the caret package. Instead, I first removed any columns
+that were not numeric (except the response variable), because I noticed that these
+were missing many values. I then removed columns that had NAs, after which I 
+removed columns that were highly correlated with other columns (threshold of 0.75).
+Lastly, I removed the timestamp variables (as they were not, strictly speaking, device
+measurements), and this left me with 31 predictor variables, with which I built my model.
 
 ````{r clean data}
 #keeping only the numeric variables
@@ -45,13 +63,17 @@ clean_data <- data_wo_time
 
 ````
 
-````{r model, cache = TRUE}
+I built one model, using 10-fold cross-validation and generalized boosted regression
+modeling.
+````{r build model, message = FALSE, cache = TRUE}
 #building model using gbm and cross-fold validation (for speed reasons)
-model <- train(classe ~ ., method = "gbm", trControl = trainControl(method = "cv", number = 10),
-               data = clean_data, verbose = TRUE)
+model <- train(classe ~ ., method = "gbm", trControl = trainControl(method = "cv",
+               number = 10), data = clean_data, verbose = TRUE)
 ````
 
-````{r clean test data, cache = TRUE}
+I then selected the same variables in the test data set that were used to train my
+model:
+````{r clean test data}
 
 #predict with model
 test_data <- read.csv("pml-testing.csv")
@@ -67,8 +89,10 @@ clean_test_data <- subset(test_data, select = keepvariables)
 
 ````
 
+After cleaning the test data set, I used the model to predict the values of the
+20 test cases, which were then written to 20 text files.
 ````{r predict}
-answers <- predict(model, data = clean_test_data)
+answers <- predict(model, clean_test_data)
 
 pml_write_files <- function(x){
   n = length(x)
@@ -79,5 +103,14 @@ pml_write_files <- function(x){
 }
 
 pml_write_files(answers)
-
 ````
+
+## Results
+Below is the model that was used in prediction, which yielded correct predictions
+for all 20 test cases:
+````{r view model}
+print(model)
+````
+As the model incorporates 10-fold cross-validation into the train function that
+was used to build it, the out of sample (OOS) error is:
+**OOS = 1 - accuracy = 1-0.95 = 0.05**
