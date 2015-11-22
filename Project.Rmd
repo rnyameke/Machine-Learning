@@ -111,5 +111,5 @@ for all 20 test cases:
 print(model)
 ````
 As the model incorporates 10-fold cross-validation into the train function that
-was used to build it, the out of sample (OOS) error is:
+was used to build it, the out of sample (OOS) error is:  
 **OOS = 1 - accuracy = 1-0.95 = 0.05**
