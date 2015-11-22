@@ -12,6 +12,7 @@ data <- read.csv("pml-training.csv")
 library(dplyr)
 library(caret)
 library(ggplot2)
+library(gbm)
 ````
 
 ````{r clean data}
