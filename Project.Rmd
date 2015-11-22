@@ -1,0 +1,36 @@
+---
+title: "Course Project"
+author: "Rose Nyameke"
+date: "November 21, 2015"
+output: 
+  html_document: 
+    keep_md: yes
+---
+````{r load, message = FALSE}
+data <- read.csv("pml-training.csv")
+library(dplyr)
+library(caret)
+library(ggplot2)
+````
+
+````{r clean data}
+#keeping only the numeric variables
+data_wo_factors <- data[sapply(data, is.numeric)]
+
+#re-introducing the classe variable
+data_wo_factors <- cbind(data$classe, data_wo_factors)
+
+#removing the row numbering variable
+data_wo_factors <- data_wo_factors[, -2]
+
+#removing columns with nas
+data_wo_nas <- data_wo_factors[, colSums(is.na(data_wo_factors)) == 0]
+
+#finding highly correlated predictor variables
+correlationMatrix <- cor(data_wo_nas[,-1])
+highcorr <- findCorrelation(correlationMatrix, cutoff = 0.75)
+
+#removing the highly correlated columns
+data_wo_corr <- data_wo_nas[,-highcorr]
+
+````
