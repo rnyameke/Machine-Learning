@@ -21,7 +21,6 @@ data <- read.csv("pml-training.csv")
 library(plyr)
 library(dplyr)
 library(caret)
-library(ggplot2)
 library(gbm)
 ````
 
@@ -65,7 +64,7 @@ clean_data <- data_wo_time
 
 I built one model, using 10-fold cross-validation and generalized boosted regression
 modeling.
-````{r build model, message = FALSE, cache = TRUE}
+````{r build model, results = FALSE, cache = TRUE}
 #building model using gbm and cross-fold validation (for speed reasons)
 model <- train(classe ~ ., method = "gbm", trControl = trainControl(method = "cv",
                number = 10), data = clean_data, verbose = TRUE)
